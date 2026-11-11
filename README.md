@@ -206,3 +206,35 @@ CSV data
 	-> select LightGBM by ROC-AUC
 	-> save fitted preprocessing and model with Joblib
 ```
+
+
+## Deployment Demonstration (FastAPI + Docker + Render)
+
+The repository includes a small inference API that loads the exported pipeline artifact and applies the same feature engineering before prediction.
+
+### Run locally
+
+Install the API dependencies and start the service:
+
+```bash
+python -m pip install -r requirements.txt
+uvicorn app:app --reload
+```
+
+- Health check: `GET http://127.0.0.1:8000/health`
+- Prediction: `POST http://127.0.0.1:8000/predict`
+
+Send a JSON object containing a `bookings` array. Each booking must contain the original input columns used by the notebook, including the stay-night, guest-count, previous-cancellation, and ADR fields. The API returns a cancellation probability and a 0/1 prediction for each row. Open `/docs` to try the endpoint interactively.
+
+### Deploy with Render
+
+The included `render.yaml` and `Dockerfile` define a Docker web service. Connect this repository to Render and deploy from the repository root. Render builds the image, starts Uvicorn, and checks `/health`. The model artifact is included in the image; for a production system, consider storing large model artifacts in a dedicated artifact store and pinning the Python/library versions used during training.
+
+### Run API tests
+
+```bash
+python -m pip install -r requirements.txt
+pytest -q
+```
+
+The tests cover the extracted feature-engineering behavior. They do not load or validate the serialized model artifact.

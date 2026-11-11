@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: hotel-booking-cancellation-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
